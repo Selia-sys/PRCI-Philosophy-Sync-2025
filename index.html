@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0e1a">
+    <title>PRCI - Philosophical Research Command Interface</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiUGhpbG9zb3BoaWNhbCBSZXNlYXJjaCBDb21tYW5kIEludGVyZmFjZSIsInNob3J0X25hbWUiOiJQUkNJIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwYTBlMWEiLCJ0aGVtZV9jb2xvciI6IiM2MzY2ZjEiLCJvcmllbnRhdGlvbiI6ImFueSJ9">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --primary-bg: #0a0e1a;
+            --secondary-bg: #141925;
+            --tertiary-bg: #1e2433;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-dim: #4338ca;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-dim: #64748b;
+            --border: #334155;
+            --highlight: #fbbf24;
+            --danger: #ef4444;
+            --success: #10b981;
+            --card-bg: rgba(20, 25, 37, 0.95);
+            --modal-bg: rgba(10, 14, 26, 0.98);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Quantum background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(251, 191, 36, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 100%;
+            padding: 1rem;
+            padding-bottom: 80px;
+        }
+        
+        /* Header */
+        header {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        h1 {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.8rem;
+            font-weight: 400;
+            background: linear-gradient(135deg, var(--accent-light), var(--highlight));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.3rem;
+        }
+        
+        .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .integration-bar {
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            width: 92.3%;
+            margin: 0.8rem auto 0;
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .integration-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+        }
+        
+        /* Main Navigation */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-card:hover, .nav-card:active {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .nav-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .nav-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Quick Capture */
+        .quick-capture {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .capture-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+        
+        .capture-title {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.3rem;
+            color: var(--accent-light);
+        }
+        
+        .capture-area {
+            width: 100%;
+            min-height: 100px;
+            background: var(--tertiary-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            outline: none;
+        }
+        
+        .capture-area:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        
+        .capture-tools {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+            flex-wrap: wrap;
+        }
+        
+        .tool-btn {
+            padding: 0.5rem 1rem;
+            background: var(--tertiary-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tool-btn:hover, .tool-btn:active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        /* Research Stream */
+        .research-stream {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stream-header {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.3rem;
+            color: var(--accent-light);
+            margin-bottom: 1rem;
+        }
+        
+        .stream-item {
+            background: var(--tertiary-bg);
+            border-left: 3px solid var(--accent);
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            border-radius: 0 8px 8px 0;
+            position: relative;
+        }
+        
+        .stream-time {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 0.3rem;
+        }
+        
+        .stream-content {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stream-tags {
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            color: var(--accent-light);
+        }
+        
+        /* Modal System */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-bg);
+            z-index: 1000;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 2rem;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+        }
+        
+        .modal-header {
+            font-family: 'Crimson Text', serif;
+            font-size: 1.5rem;
+            color: var(--accent-light);
+            margin-bottom: 1rem;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 30px;
+            height: 30px;
+            background: var(--tertiary-bg);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        /* Philosophy Generator */
+        .philosophy-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        .philosophy-float:active {
+            transform: scale(0.95);
+        }
+        
+        /* Link Repository */
+        .link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: var(--tertiary-bg);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .link-item a {
+            color: var(--accent-light);
+            text-decoration: none;
+            flex: 1;
+            margin-right: 1rem;
+        }
+        
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+        
+        .link-status {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+        
+        /* Footnote System */
+        .footnote {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-style: italic;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+        }
+        
+        .marginal-note {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 0.8rem;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border-radius: 0 8px 8px 0;
+        }
+        
+        /* Loading States */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 2rem;
+            }
+            
+            .nav-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PRCI</h1>
+            <p class="subtitle">Philosophical Research Command Interface v7.7</p>
+            <div class="integration-bar"></div>
+        </header>
+        
+        <!-- Main Navigation -->
+        <div class="nav-grid">
+            <div class="nav-card" onclick="openModal('obsidian')">
+                <div class="nav-icon">📝</div>
+                <div class="nav-label">Vault Sync</div>
+            </div>
+            <div class="nav-card" onclick="openModal('perplexity')">
+                <div class="nav-icon">🔮</div>
+                <div class="nav-label">Perplexity</div>
+            </div>
+            <div class="nav-card" onclick="openModal('links')">
+                <div class="nav-icon">🔗</div>
+                <div class="nav-label">Link Forge</div>
+            </div>
+            <div class="nav-card" onclick="openModal('research')">
+                <div class="nav-icon">🔬</div>
+                <div class="nav-label">Research</div>
+            </div>
+        </div>
+        
+        <!-- Quick Capture -->
+        <div class="quick-capture">
+            <div class="capture-header">
+                <div class="capture-title">Quantum Capture</div>
+                <div id="save-status" style="font-size: 0.8rem; color: var(--text-dim);"></div>
+            </div>
+            <textarea class="capture-area" id="capture" placeholder="Capture thoughts before they collapse into certainty..."></textarea>
+            <div class="capture-tools">
+                <button class="tool-btn" onclick="saveToVault()">→ Vault</button>
+                <button class="tool-btn" onclick="askPerplexity()">→ Perplexity</button>
+                <button class="tool-btn" onclick="generatePhilosophy()">→ Philosophy</button>
+                <button class="tool-btn" onclick="addTimestamp()">+ Timestamp</button>
+                <button class="tool-btn" onclick="addFootnote()">+ Footnote†</button>
+            </div>
+        </div>
+        
+        <!-- Research Stream -->
+        <div class="research-stream">
+            <div class="stream-header">Research Stream</div>
+            <div id="stream-container">
+                <div class="stream-item">
+                    <div class="stream-time">2 minutes ago</div>
+                    <div class="stream-content">The 7.7% incompleteness principle manifests in interface design as deliberate friction points that prevent Perfect Integration syndrome.</div>
+                    <div class="stream-tags">
+                        <span class="tag">#interface</span>
+                        <span class="tag">#7.7%</span>
+                        <span class="tag">#phenomenology</span>
+                    </div>
+                </div>
+                <div class="marginal-note">
+                    <strong>Field Note:</strong> This PWA exists in the liminal space between your tools, achieving 92.3% integration while maintaining crucial incompleteness.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modals -->
+        <div class="modal" id="obsidian-modal">
+            <div class="modal-content">
+                <div class="modal-close" onclick="closeModal('obsidian')">×</div>
+                <div class="modal-header">Obsidian Vault Sync</div>
+                <div class="marginal-note">
+                    <strong>Protocol:</strong> Connect via GitHub for bidirectional sync. Your vault remains the source of truth; this interface provides the missing 7.7% functionality.
+                </div>
+                <input type="text" placeholder="GitHub Repository URL" style="width: 100%; padding: 0.8rem; background: var(--tertiary-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); margin-bottom: 1rem;">
+                <input type="password" placeholder="Personal Access Token" style="width: 100%; padding: 0.8rem; background: var(--tertiary-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); margin-bottom: 1rem;">
+                <button class="tool-btn" style="width: 100%;">Initialize Quantum Entanglement</button>
+                <p class="footnote">† Your credentials remain in local storage. The Perfect Integration Entity cannot access them (probably).</p>
+            </div>
+        </div>
+        
+        <div class="modal" id="perplexity-modal">
+            <div class="modal-content">
+                <div class="modal-close" onclick="closeModal('perplexity')">×</div>
+                <div class="modal-header">Perplexity Integration</div>
+                <textarea placeholder="Enter your research query..." style="width: 100%; min-height: 100px; padding: 0.8rem; background: var(--tertiary-bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); margin-bottom: 1rem; font-family: 'JetBrains Mono', monospace;"></textarea>
+                <button class="tool-btn" style="width: 100%; margin-bottom: 1rem;">Query the Oracle</button>
+                <div class="marginal-note">
+                    <strong>Note:</strong> Perplexity integration requires API access. Until then, this creates formatted queries you can paste directly into Perplexity Comet.
+                </div>
+                <div id="perplexity-result" style="background: var(--tertiary-bg); padding: 1rem; border-radius: 8px; min-height: 100px; display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="modal" id="links-modal">
+            <div class="modal-content">
+                <div class="modal-close" onclick="closeModal('links')">×</div>
+                <div class="modal-header">Link Forge</div>
+                <div class="marginal-note">
+                    <strong>Transformation Protocol:</strong> Convert dead Obsidian links into living web passages.
+                </div>
+                <div class="link-item">
+                    <a href="https://plato.stanford.edu/" target="_blank">Stanford Encyclopedia of Philosophy</a>
+                    <span class="link-status">Active</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.perseus.tufts.edu/" target="_blank">Perseus Digital Library</a>
+                    <span class="link-status">Active</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://www.jstor.org/" target="_blank">JSTOR</a>
+                    <span class="link-status">Active</span>
+                </div>
+                <div class="link-item">
+                    <a href="https://archive.org/" target="_blank">Internet Archive</a>
+                
